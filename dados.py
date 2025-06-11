@@ -2,14 +2,15 @@
 import pandas as pd
 
 def carregar_dados():
-    df = pd.read_csv("demografia_mundial.csv", sep=";", encoding="utf-8", 
+    df_load = pd.read_csv("demografia_mundial.csv", sep=";", encoding="utf-8", 
                      skipinitialspace=True, decimal=",", low_memory=False)
-
+    
+    df = df_load[df_load["Type"] == "Region"]  
     # Limpar colunas
     df.columns = [col.strip() for col in df.columns]
     df.rename(columns={"Region, subregion, country or area *": "Regiao"}, inplace=True)
     df["Regiao"] = df["Regiao"].str.strip()
-
+    
 
     # Filtrar regiões relevantes
     regioes_validas = [
@@ -55,6 +56,7 @@ def carregar_dados():
 
     # Converter tipos
     df[pop_col] = pd.to_numeric(df[pop_col], errors="coerce")
+    df[pop_col] = df[pop_col] / 1e3  # Converter para milhões
     df[densidade] = pd.to_numeric(df[densidade].astype(str).str.replace(",", "."), errors="coerce")
     df[racio] = pd.to_numeric(df[racio].astype(str).str.replace(",", "."), errors="coerce")
     df[racio] = df[racio] / 100

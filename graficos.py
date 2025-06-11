@@ -24,6 +24,7 @@ def grafico_evolucao(dados, titulo, ylabel, dado, tipo,ax):
     ax.set_ylabel(ylabel)
     ax.set_xlabel("Ano")
     ax.grid(True, linestyle="--", alpha=0.5)
-    legenda = ax.legend(title="Continente", loc="best")
-    legenda.get_frame().set_facecolor("none")
-
+    #legenda = ax.legend(title="Continente", loc="best")
+    #legenda.get_frame().set_facecolor("none")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)

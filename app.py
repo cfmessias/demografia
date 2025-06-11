@@ -2,6 +2,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from dados import carregar_dados
 from graficos import grafico_evolucao
+import matplotlib.patches as mpatches
 
 # Aplica o estilo CSS personalizado
 css = """
@@ -12,7 +13,7 @@ css = """
         background-color: #f8f9fa;
         padding: 1rem;
         border-right: 1px solid #dee2e6;
-        background: linear-gradient(to left , #cbd3d6 ,#137ea8);
+        background: linear-gradient(to left , #eaeded ,#137ea8);
     }
 
     [data-testid="stSidebar"] .css-1d391kg {
@@ -31,7 +32,7 @@ css = """
     }
 
     .stApp {
-        background: linear-gradient(to left , #cbd3d6, #cbd3d6);
+        background: linear-gradient(to left , #eaeded , #eaeded);
     }
 
     [data-testid="stSidebar"] h2 {
@@ -45,6 +46,7 @@ css = """
 """
 
 
+
 # Carregar dados
 (
     df_pop, df_dens, df_racio, df_cresc,
@@ -55,6 +57,9 @@ css = """
     df_taxa_migracao_liquida, df_mortalidade_entre15e50Homens, df_mortalidade_entre15e50Mulheres
 ) = carregar_dados()
 
+
+
+print(df_pop.head())  # Verifica se os dados foram carregados corretamente
 # Grupos de gráficos
 grupos = {
     "População e Estrutura": [
@@ -89,12 +94,38 @@ st.sidebar.title("📊 Indicadores Demográficos")
 grupo_escolhido = st.sidebar.selectbox("Escolha um grupo de indicadores:", list(grupos.keys()))
 st.markdown(css, unsafe_allow_html=True)
 # Tabs para mobile-friendly layout (2 gráficos por tab)
+# Criar figura apenas para a legenda
+fig, ax = plt.subplots(figsize=(6, 0.8))
+
+# Remover os eixos (não queremos mostrar gráfico)
+ax.axis('off')
+
+# Criar patches (elementos) para a legenda com as cores
+america_patch = mpatches.Patch(color='orange', label='América')
+europa_patch = mpatches.Patch(color='red', label='Europa')
+oceania_patch = mpatches.Patch(color='purple', label='Oceania')
+africa_patch = mpatches.Patch(color='blue', label='África')
+asia_patch = mpatches.Patch(color='green', label='Ásia')
+
+# Criar a legenda
+ax.legend(handles=[america_patch, europa_patch, oceania_patch, africa_patch, asia_patch],
+          loc='center',           # Centralizar na figura
+          ncol=5,                 # 5 colunas (horizontal)
+          frameon=False,          # SEM moldura
+          fontsize='xx-small',       # Tamanho da fonte menor
+          columnspacing=1.0,      # Espaçamento entre colunas
+          handlelength=1.1,       # Comprimento das linhas/patches
+          handletextpad=0.5,      # Espaço entre patch e texto
+          borderpad=0.2)          # Padding interno da legenda
+
+st.pyplot(fig,transparent=True)
+
 tab1, tab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
 
 # Tab 1 – primeiros dois gráficos
 with tab1:
     fig, axs = plt.subplots(1, 2, figsize=(12, 5))
-    for i in range(2):
+    for i in range(0,2):
         df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
         grafico_evolucao(df, titulo, ylabel, dado, 'linha',axs[i])
     st.pyplot(fig,transparent=True)
@@ -106,3 +137,5 @@ with tab2:
         df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
         grafico_evolucao(df, titulo, ylabel, dado,'linha', axs[i - 2])
     st.pyplot(fig,transparent=True)
+
+
