@@ -1,36 +1,29 @@
-# graficos.py
 import matplotlib.pyplot as plt
 
+cores_continentes = {
+    "África": "#1f77b4",
+    "América": "#ff7f0e",
+    "Ásia": "#2ca02c",
+    "Europa": "#d62728",
+    "Oceania": "#9467bd"
+}
 
-def grafico_evolucao(df,titulo, ylabel,dado,ax):
-    for continente in df["Continente"].unique():
-        dados = df[df["Continente"] == continente]
-        ax.plot(dados["Year"], dados[dado], label=continente)
-    ax.set_title(titulo)
-    ax.set_xlabel("Ano")
-    ax.set_ylabel(ylabel)
-    ax.legend(title="Continente")
-    ax.grid(True)
+def grafico_evolucao(dados, titulo, ylabel, dado, tipo,ax):
+    continentes = dados["Continente"].unique()
 
-def grafico_evolucao1(df, titulo, ylabel, dado, ax, linewidth=3):
-    # Definir cores para cada continente
-    cores = {
-        'África': '#137ea8',
-        'Ásia': '#d35400', 
-        'Europa': '#239b56',
-        'América': '#7b241c',
-        'Oceania': '#f1c40f'
-    }
-    
-    for continente in df["Continente"].unique():
-        dados = df[df["Continente"] == continente]
-        cor = cores.get(continente, 'black')  # cor padrão se não encontrar
-        ax.plot(dados["Year"], dados[dado], 
-                label=continente, 
-                color=cor, 
-                linewidth=linewidth)
+    for continente in continentes:
+        df_continente = dados[dados["Continente"] == continente]
+        cor = cores_continentes.get(continente, None)
+        
+        if tipo == 'barra':
+            ax.bar(df_continente["Year"], df_continente[dado], label=continente, color=cor, alpha=0.7)
+        else:
+            ax.plot(df_continente["Year"], df_continente[dado], label=continente, color=cor)
+
     ax.set_title(titulo)
-    ax.set_xlabel("Ano")
     ax.set_ylabel(ylabel)
-    ax.legend(title="Continente")
-    ax.grid(True)
+    ax.set_xlabel("Ano")
+    ax.grid(True, linestyle="--", alpha=0.5)
+    legenda = ax.legend(title="Continente", loc="best")
+    legenda.get_frame().set_facecolor("none")
+

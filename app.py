@@ -96,7 +96,7 @@ with tab1:
     fig, axs = plt.subplots(1, 2, figsize=(12, 5))
     for i in range(2):
         df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-        grafico_evolucao(df, titulo, ylabel, dado, axs[i])
+        grafico_evolucao(df, titulo, ylabel, dado, 'linha',axs[i])
     st.pyplot(fig,transparent=True)
 
 # Tab 2 – últimos dois gráficos
@@ -104,5 +104,5 @@ with tab2:
     fig, axs = plt.subplots(1, 2, figsize=(12, 5))
     for i in range(2, 4):
         df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-        grafico_evolucao(df, titulo, ylabel, dado, axs[i - 2])
+        grafico_evolucao(df, titulo, ylabel, dado,'linha', axs[i - 2])
     st.pyplot(fig,transparent=True)
