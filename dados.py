@@ -5,7 +5,9 @@ def carregar_dados():
     df_load = pd.read_csv("demografia_mundial.csv", sep=";", encoding="utf-8", 
                      skipinitialspace=True, decimal=",", low_memory=False)
     
-    df = df_load[df_load["Type"] == "Region"]  
+    # CORREÇÃO: Adicionar .copy() para evitar o SettingWithCopyWarning
+    df = df_load[df_load["Type"] == "Region"].copy()
+    
     # Limpar colunas
     df.columns = [col.strip() for col in df.columns]
     df.rename(columns={"Region, subregion, country or area *": "Regiao"}, inplace=True)
@@ -74,6 +76,7 @@ def carregar_dados():
     df[taxa_migracao_liquida] = pd.to_numeric(df[taxa_migracao_liquida].astype(str).str.replace(",", "."), errors="coerce") 
     df[mortalidade_entre15e50Homens] = pd.to_numeric(df[mortalidade_entre15e50Homens].astype(str).str.replace(",", "."), errors="coerce")
     df[mortalidade_entre15e50Mulheres] = pd.to_numeric(df[mortalidade_entre15e50Mulheres].astype(str).str.replace(",", "."), errors="coerce")
+    
     # Agregações
     df_pop = df.groupby(["Continente", "Year"])[pop_col].sum().reset_index().rename(columns={pop_col: "Populacao"})
     df_dens = df.groupby(["Continente", "Year"])[densidade].mean().reset_index().rename(columns={densidade: "Densidade"})
@@ -92,6 +95,7 @@ def carregar_dados():
     df_taxa_migracao_liquida = df.groupby(["Continente", "Year"])[taxa_migracao_liquida].sum().reset_index().rename(columns={taxa_migracao_liquida: "TaxaMigracaoLiquida"})
     df_mortalidade_entre15e50Homens = df.groupby(["Continente", "Year"])[mortalidade_entre15e50Homens].mean().reset_index().rename(columns={mortalidade_entre15e50Homens: "MortalidadeEntre15e50Homens"})
     df_mortalidade_entre15e50Mulheres = df.groupby(["Continente", "Year"])[mortalidade_entre15e50Mulheres].mean().reset_index().rename(columns={mortalidade_entre15e50Mulheres: "MortalidadeEntre15e50Mulheres"})
+    
     return (df_pop, 
         df_dens, 
         df_racio, 

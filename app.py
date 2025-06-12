@@ -1,51 +1,45 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 from dados import carregar_dados
-from graficos import grafico_evolucao
+from graficos import grafico_evolucao, grafico_mortalidade_stack
 import matplotlib.patches as mpatches
+import io
 
 # Aplica o estilo CSS personalizado
 css = """
 <style>
     [data-testid="stSidebar"] {
-        min-width: 250px;
-        max-width: 350px;
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-right: 1px solid #dee2e6;
+        min-width: 100px;
+        max-width: 120px;
         background: linear-gradient(to left , #eaeded ,#137ea8);
+        padding: 0.5rem;
+        border-right: 1px solid #dee2e6;
     }
 
-    [data-testid="stSidebar"] .css-1d391kg {
-        font-family: 'Arial', sans-serif;
-    }
-
-    .stSelectbox label {
+    .sidebar-title-vertical {
+        writing-mode: vertical-lr;
+        text-orientation: upright;
         font-size: 16px;
         font-weight: bold;
-        color: #02394e;
-        margin-bottom: 5px;
+        color: white;
+        text-align: center;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
     }
 
-    .stSelectbox div[data-baseweb="select"] {
-        border-radius: 5px;
+    .stSelectbox {
+        display: none; /* Esconde temporariamente a selectbox */
     }
 
     .stApp {
         background: linear-gradient(to left , #eaeded , #eaeded);
     }
-
-    [data-testid="stSidebar"] h2 {
-        font-size: 20px;
-        color: white;
-        font-weight: bold;
-        text-align: left;
-        margin-bottom: 20px;
-    }
 </style>
+
 """
-
-
 
 # Carregar dados
 (
@@ -57,9 +51,6 @@ css = """
     df_taxa_migracao_liquida, df_mortalidade_entre15e50Homens, df_mortalidade_entre15e50Mulheres
 ) = carregar_dados()
 
-
-
-print(df_pop.head())  # Verifica se os dados foram carregados corretamente
 # Grupos de gráficos
 grupos = {
     "População e Estrutura": [
@@ -90,52 +81,62 @@ grupos = {
 
 # Interface
 st.set_page_config(page_title="Indicadores Demográficos", layout="wide")
-st.sidebar.title("📊 Indicadores Demográficos")
-grupo_escolhido = st.sidebar.selectbox("Escolha um grupo de indicadores:", list(grupos.keys()))
+st.sidebar.markdown("""
+<div class="sidebar-title-vertical">📊 INDICADORES DEMOGRÁFICOS</div>
+""", unsafe_allow_html=True)
+
 st.markdown(css, unsafe_allow_html=True)
-# Tabs para mobile-friendly layout (2 gráficos por tab)
-# Criar figura apenas para a legenda
-fig, ax = plt.subplots(figsize=(6, 0.8))
 
-# Remover os eixos (não queremos mostrar gráfico)
-ax.axis('off')
+# Criar tabs para os grupos principais
+tab_grupos = st.tabs(["📊População e Estrutura", "📈Natalidade e Mortalidade", "📜Mortalidade Específica", "🔬Indicadores Adicionais"])
 
-# Criar patches (elementos) para a legenda com as cores
-america_patch = mpatches.Patch(color='orange', label='América')
-europa_patch = mpatches.Patch(color='red', label='Europa')
-oceania_patch = mpatches.Patch(color='purple', label='Oceania')
-africa_patch = mpatches.Patch(color='blue', label='África')
-asia_patch = mpatches.Patch(color='green', label='Ásia')
+for tab, grupo_nome in zip(tab_grupos, grupos.keys()):
+    with tab:
+        # Criar legenda compacta
+        fig_legend = plt.figure(figsize=(6, 0.4), dpi=300)
+        ax_legend = fig_legend.add_axes([0, 0, 1, 1])
+        ax_legend.axis('off')
 
-# Criar a legenda
-ax.legend(handles=[america_patch, europa_patch, oceania_patch, africa_patch, asia_patch],
-          loc='center',           # Centralizar na figura
-          ncol=5,                 # 5 colunas (horizontal)
-          frameon=False,          # SEM moldura
-          fontsize='xx-small',       # Tamanho da fonte menor
-          columnspacing=1.0,      # Espaçamento entre colunas
-          handlelength=1.1,       # Comprimento das linhas/patches
-          handletextpad=0.5,      # Espaço entre patch e texto
-          borderpad=0.2)          # Padding interno da legenda
+        patches = [
+            mpatches.Patch(color='orange', label='América'),
+            mpatches.Patch(color='red', label='Europa'),
+            mpatches.Patch(color='purple', label='Oceania'),
+            mpatches.Patch(color='blue', label='África'),
+            mpatches.Patch(color='green', label='Ásia')
+        ]
 
-st.pyplot(fig,transparent=True)
+        ax_legend.legend(
+            handles=patches,
+            loc='center',
+            ncol=5,
+            frameon=False,
+            fontsize='xx-small',
+            columnspacing=0.5,
+            handlelength=1.0,
+            handletextpad=0.4,
+            borderpad=0.0
+        )
 
-tab1, tab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
+        buf = io.BytesIO()
+        fig_legend.savefig(buf, format="png", bbox_inches="tight", transparent=True, pad_inches=0)
+        buf.seek(0)
+        st.image(buf)
 
-# Tab 1 – primeiros dois gráficos
-with tab1:
-    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
-    for i in range(0,2):
-        df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-        grafico_evolucao(df, titulo, ylabel, dado, 'linha',axs[i])
-    st.pyplot(fig,transparent=True)
+        # Gráficos do grupo
+        subtab1, subtab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
 
-# Tab 2 – últimos dois gráficos
-with tab2:
-    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
-    for i in range(2, 4):
-        df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-        grafico_evolucao(df, titulo, ylabel, dado,'linha', axs[i - 2])
-    st.pyplot(fig,transparent=True)
+        with subtab1:
+            fig, axs = plt.subplots(1, 2, figsize=(9.6, 3.5))
+            for i in range(0, 2):
+                df, titulo, ylabel, dado = grupos[grupo_nome][i]
+                grafico_evolucao(df, titulo, ylabel, dado, 'linha', axs[i])
+            fig.patch.set_alpha(0.0)
+            st.pyplot(fig, transparent=True)
 
-
+        with subtab2:
+            fig, axs = plt.subplots(1, 2, figsize=(9.6, 3.5))
+            for i in range(2, 4):
+                df, titulo, ylabel, dado = grupos[grupo_nome][i]
+                grafico_evolucao(df, titulo, ylabel, dado, 'linha', axs[i - 2])
+            fig.patch.set_alpha(0.0)
+            st.pyplot(fig, transparent=True)
