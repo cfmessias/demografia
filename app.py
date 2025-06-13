@@ -106,9 +106,21 @@ fig_legend.savefig(buf, format="png", bbox_inches="tight", transparent=True, pad
 buf.seek(0)
 st.image(buf)
 
-# Mostrar gráficos do grupo selecionado
-for df, titulo, ylabel, dado in grupos[grupo_escolhido]:
-    fig, ax = plt.subplots(figsize=(8, 4))
-    grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
-    fig.patch.set_alpha(0.0)
-    st.pyplot(fig, transparent=True)
+# Tabs com 2 gráficos por aba
+subtab1, subtab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
+
+with subtab1:
+    for i in range(2):
+        df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
+        fig, ax = plt.subplots(figsize=(8, 4))
+        grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
+        fig.patch.set_alpha(0.0)
+        st.pyplot(fig, transparent=True)
+
+with subtab2:
+    for i in range(2, 4):
+        df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
+        fig, ax = plt.subplots(figsize=(8, 4))
+        grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
+        fig.patch.set_alpha(0.0)
+        st.pyplot(fig, transparent=True)
