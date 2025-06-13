@@ -8,10 +8,22 @@ import io
 # Aplica o estilo CSS personalizado
 css = """
 <style>
-    [data-testid="stSidebar"] {
-        background-color: #f8f9fa;
-        background: linear-gradient(to left , #eaeded ,#137ea8);
+    [data-baseweb="tab"] button {
+    color: #333 !important;
     }
+    [data-baseweb="tab"] button[aria-selected="true"] {
+    color: #0b3c5d !important;
+    font-weight: bold;
+    }
+
+      [data-testid="stSidebar"] {
+        min-width: 100px;
+        max-width: 120px;
+        background: linear-gradient(to left , #eaeded ,#137ea8);
+        padding: 0.5rem;
+        border-right: 1px solid #dee2e6;
+    }
+
 
     .sidebar-title-vertical {
         writing-mode: vertical-rl;
@@ -26,15 +38,6 @@ css = """
 
     .stApp {
         background: linear-gradient(to left , #eaeded , #eaeded);
-    }
-
-    [data-baseweb="tab"] button {
-        color: #333 !important;
-    }
-
-    [data-baseweb="tab"] button[aria-selected="true"] {
-        color: #0b3c5d !important;
-        font-weight: bold;
     }
 </style>
 """
@@ -115,48 +118,21 @@ fig_legend.savefig(buf, format="png", bbox_inches="tight", transparent=True, pad
 buf.seek(0)
 st.image(buf)
 
-# Detectar tipo de ecrã com base na largura da janela do navegador (experimental via componente customizado)
-st.markdown("""
-    <script>
-        const sendWidth = () => {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const dimension = `${width}x${height}`;
-            window.parent.postMessage({ type: "streamlit:width", width: width }, "*");
-        };
-        window.addEventListener("load", sendWidth);
-        window.addEventListener("resize", sendWidth);
-    </script>
-""", unsafe_allow_html=True)
+# Tabs com 2 gráficos por aba
+subtab1, subtab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
 
-# Placeholder para receber largura simulada via st.session_state ou default
-largura_simulada = st.session_state.get("largura_simulada", 1200)
-
-# Layout dinâmico com base na largura do ecrã
-usar_layout_vertical = largura_simulada < 768
-
-if usar_layout_vertical:
-    for i in range(4):
+with subtab1:
+    for i in range(2):
         df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-        fig, ax = plt.subplots(figsize=(6, 2.8))
+        fig, ax = plt.subplots(figsize=(8, 4))
         grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
         fig.patch.set_alpha(0.0)
         st.pyplot(fig, transparent=True)
-else:
-    subtab1, subtab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
 
-    with subtab1:
-        fig, axs = plt.subplots(1, 2, figsize=(9.6, 3))
-        for i in range(0, 2):
-            df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-            grafico_evolucao(df, titulo, ylabel, dado, 'linha', axs[i])
-        fig.patch.set_alpha(0.0)
-        st.pyplot(fig, transparent=True)
-
-    with subtab2:
-        fig, axs = plt.subplots(1, 2, figsize=(9.6, 3))
-        for i in range(2, 4):
-            df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-            grafico_evolucao(df, titulo, ylabel, dado, 'linha', axs[i - 2])
+with subtab2:
+    for i in range(2, 4):
+        df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
+        fig, ax = plt.subplots(figsize=(8, 4))
+        grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
         fig.patch.set_alpha(0.0)
         st.pyplot(fig, transparent=True)
