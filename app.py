@@ -124,7 +124,7 @@ subtab1, subtab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
 with subtab1:
     for i in range(2):
         df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-        fig, ax = plt.subplots(figsize=(6, 2))
+        fig, ax = plt.subplots(figsize=(8, 4))
         grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
         fig.patch.set_alpha(0.0)
         st.pyplot(fig, transparent=True)
@@ -132,7 +132,7 @@ with subtab1:
 with subtab2:
     for i in range(2, 4):
         df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-        fig, ax = plt.subplots(figsize=(6, 2))
+        fig, ax = plt.subplots(figsize=(8, 4))
         grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
         fig.patch.set_alpha(0.0)
         st.pyplot(fig, transparent=True)
