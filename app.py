@@ -8,10 +8,22 @@ import io
 # Aplica o estilo CSS personalizado
 css = """
 <style>
-    [data-testid="stSidebar"] {
-        background-color: #f8f9fa;
-        background: linear-gradient(to left , #eaeded ,#137ea8);
+    [data-baseweb="tab"] button {
+    color: #333 !important;
     }
+    [data-baseweb="tab"] button[aria-selected="true"] {
+    color: #0b3c5d !important;
+    font-weight: bold;
+    }
+
+      [data-testid="stSidebar"] {
+        min-width: 100px;
+        max-width: 120px;
+        background: linear-gradient(to left , #eaeded ,#137ea8);
+        padding: 0.5rem;
+        border-right: 1px solid #dee2e6;
+    }
+
 
     .sidebar-title-vertical {
         writing-mode: vertical-rl;
@@ -112,7 +124,7 @@ subtab1, subtab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
 with subtab1:
     for i in range(2):
         df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-        fig, ax = plt.subplots(figsize=(8, 4))
+        fig, ax = plt.subplots(figsize=(6, 2))
         grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
         fig.patch.set_alpha(0.0)
         st.pyplot(fig, transparent=True)
@@ -120,7 +132,7 @@ with subtab1:
 with subtab2:
     for i in range(2, 4):
         df, titulo, ylabel, dado = grupos[grupo_escolhido][i]
-        fig, ax = plt.subplots(figsize=(8, 4))
+        fig, ax = plt.subplots(figsize=(6, 2))
         grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
         fig.patch.set_alpha(0.0)
         st.pyplot(fig, transparent=True)

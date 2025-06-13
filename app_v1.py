@@ -126,7 +126,7 @@ for tab, grupo_nome in zip(tab_grupos, grupos.keys()):
         subtab1, subtab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
 
         with subtab1:
-            fig, axs = plt.subplots(1, 2, figsize=(9.6, 3.5))
+            fig, axs = plt.subplots(1, 2, figsize=(9.6, 3))
             for i in range(0, 2):
                 df, titulo, ylabel, dado = grupos[grupo_nome][i]
                 grafico_evolucao(df, titulo, ylabel, dado, 'linha', axs[i])
@@ -134,7 +134,7 @@ for tab, grupo_nome in zip(tab_grupos, grupos.keys()):
             st.pyplot(fig, transparent=True)
 
         with subtab2:
-            fig, axs = plt.subplots(1, 2, figsize=(9.6, 3.5))
+            fig, axs = plt.subplots(1, 2, figsize=(9.6, 3))
             for i in range(2, 4):
                 df, titulo, ylabel, dado = grupos[grupo_nome][i]
                 grafico_evolucao(df, titulo, ylabel, dado, 'linha', axs[i - 2])
