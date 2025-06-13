@@ -115,25 +115,22 @@ fig_legend.savefig(buf, format="png", bbox_inches="tight", transparent=True, pad
 buf.seek(0)
 st.image(buf)
 
-# Detectar tipo de ecrã com base na largura da janela do navegador (experimental via componente customizado)
+# JavaScript para enviar o user agent e largura para o backend
 st.markdown("""
-    <script>
-        const sendWidth = () => {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const dimension = `${width}x${height}`;
-            window.parent.postMessage({ type: "streamlit:width", width: width }, "*");
-        };
-        window.addEventListener("load", sendWidth);
-        window.addEventListener("resize", sendWidth);
-    </script>
+<script>
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    const width = window.innerWidth;
+    window.parent.postMessage({
+        type: "streamlit:setComponentValue",
+        key: "detectar_dispositivo",
+        value: { largura: width, isMobile: isMobile },
+    }, "*");
+</script>
 """, unsafe_allow_html=True)
 
-# Placeholder para receber largura simulada via st.session_state ou default
-largura_simulada = st.session_state.get("largura_simulada", 1200)
-
-# Layout dinâmico com base na largura do ecrã
-usar_layout_vertical = largura_simulada < 768
+# Placeholder experimental
+info_dispositivo = st.session_state.get("detectar_dispositivo", {"largura": 1200, "isMobile": False})
+usar_layout_vertical = info_dispositivo.get("isMobile", False) or info_dispositivo.get("largura", 0) < 768
 
 if usar_layout_vertical:
     for i in range(4):
