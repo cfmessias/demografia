@@ -9,25 +9,36 @@ import io
 css = """
 <style>
     [data-testid="stSidebar"] {
-        background-color: #f8f9fa;
+        min-width: 100px;
+        max-width: 120px;
         background: linear-gradient(to left , #eaeded ,#137ea8);
+        padding: 0.5rem;
+        border-right: 1px solid #dee2e6;
     }
 
     .sidebar-title-vertical {
-        writing-mode: vertical-rl;
+        writing-mode: vertical-lr;
         text-orientation: upright;
-        font-family: 'Arial', sans-serif;
-        font-size: 14px;
-        color: white;
+        font-size: 16px;
         font-weight: bold;
-        margin: 1rem auto;
+        color: white;
         text-align: center;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+    }
+
+    .stSelectbox {
+        display: none; /* Esconde temporariamente a selectbox */
     }
 
     .stApp {
         background: linear-gradient(to left , #eaeded , #eaeded);
     }
 </style>
+
 """
 
 # Carregar dados
@@ -70,45 +81,62 @@ grupos = {
 
 # Interface
 st.set_page_config(page_title="Indicadores Demográficos", layout="wide")
+st.sidebar.markdown("""
+<div class="sidebar-title-vertical">📊 INDICADORES DEMOGRÁFICOS</div>
+""", unsafe_allow_html=True)
+
 st.markdown(css, unsafe_allow_html=True)
-st.sidebar.markdown('<div class="sidebar-title-vertical">📊 INDICADORES DEMOGRÁFICOS</div>', unsafe_allow_html=True)
 
-# Escolha do grupo
-grupo_escolhido = st.selectbox("Escolha o grupo de indicadores:", list(grupos.keys()))
+# Criar tabs para os grupos principais
+tab_grupos = st.tabs(["📊População e Estrutura", "📈Natalidade e Mortalidade", "📜Mortalidade Específica", "🔬Indicadores Adicionais"])
 
-# Criar legenda compacta
-fig_legend = plt.figure(figsize=(6, 0.4), dpi=300)
-ax_legend = fig_legend.add_axes([0, 0, 1, 1])
-ax_legend.axis('off')
+for tab, grupo_nome in zip(tab_grupos, grupos.keys()):
+    with tab:
+        # Criar legenda compacta
+        fig_legend = plt.figure(figsize=(6, 0.4), dpi=300)
+        ax_legend = fig_legend.add_axes([0, 0, 1, 1])
+        ax_legend.axis('off')
 
-patches = [
-    mpatches.Patch(color='orange', label='América'),
-    mpatches.Patch(color='red', label='Europa'),
-    mpatches.Patch(color='purple', label='Oceania'),
-    mpatches.Patch(color='blue', label='África'),
-    mpatches.Patch(color='green', label='Ásia')
-]
+        patches = [
+            mpatches.Patch(color='orange', label='América'),
+            mpatches.Patch(color='red', label='Europa'),
+            mpatches.Patch(color='purple', label='Oceania'),
+            mpatches.Patch(color='blue', label='África'),
+            mpatches.Patch(color='green', label='Ásia')
+        ]
 
-ax_legend.legend(
-    handles=patches,
-    loc='center',
-    ncol=5,
-    frameon=False,
-    fontsize='xx-small',
-    columnspacing=0.5,
-    handlelength=1.0,
-    handletextpad=0.4,
-    borderpad=0.0
-)
+        ax_legend.legend(
+            handles=patches,
+            loc='center',
+            ncol=5,
+            frameon=False,
+            fontsize='xx-small',
+            columnspacing=0.5,
+            handlelength=1.0,
+            handletextpad=0.4,
+            borderpad=0.0
+        )
 
-buf = io.BytesIO()
-fig_legend.savefig(buf, format="png", bbox_inches="tight", transparent=True, pad_inches=0)
-buf.seek(0)
-st.image(buf)
+        buf = io.BytesIO()
+        fig_legend.savefig(buf, format="png", bbox_inches="tight", transparent=True, pad_inches=0)
+        buf.seek(0)
+        st.image(buf)
 
-# Mostrar gráficos do grupo selecionado
-for df, titulo, ylabel, dado in grupos[grupo_escolhido]:
-    fig, ax = plt.subplots(figsize=(8, 4))
-    grafico_evolucao(df, titulo, ylabel, dado, 'linha', ax)
-    fig.patch.set_alpha(0.0)
-    st.pyplot(fig, transparent=True)
+        # Gráficos do grupo
+        subtab1, subtab2 = st.tabs(["Gráficos 1 e 2", "Gráficos 3 e 4"])
+
+        with subtab1:
+            fig, axs = plt.subplots(1, 2, figsize=(9.6, 3.5))
+            for i in range(0, 2):
+                df, titulo, ylabel, dado = grupos[grupo_nome][i]
+                grafico_evolucao(df, titulo, ylabel, dado, 'linha', axs[i])
+            fig.patch.set_alpha(0.0)
+            st.pyplot(fig, transparent=True)
+
+        with subtab2:
+            fig, axs = plt.subplots(1, 2, figsize=(9.6, 3.5))
+            for i in range(2, 4):
+                df, titulo, ylabel, dado = grupos[grupo_nome][i]
+                grafico_evolucao(df, titulo, ylabel, dado, 'linha', axs[i - 2])
+            fig.patch.set_alpha(0.0)
+            st.pyplot(fig, transparent=True)
